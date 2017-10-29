@@ -65,6 +65,11 @@ func myWalk() {
 }
 
 func myScan(file_path string, search_word string) error {
+	type scanResult struct {
+		index int
+		value string
+	}
+	result := make([]scanResult, 0)
 	file, err := os.Open(file_path)
 	if err != nil {
 		return err
@@ -73,21 +78,30 @@ func myScan(file_path string, search_word string) error {
 	file_index := 0
 	match_flg := false
 	scanner := bufio.NewScanner(file)
+	dis_file_path := ""
 	for scanner.Scan() {
 		file_index++
 		if strings.Index(scanner.Text(), search_word) > -1 {
 			if !match_flg {
-				//一度配列とかMapとかに入れた方がいい
-				fmt.Println(file_path)
+				dis_file_path = file_path
 			}
 			match_flg = true
-			fmt.Print("\t" + strconv.Itoa(file_index) + "\t")
+			dis_result := ""
 			if len(scanner.Text()) > 60 {
-				fmt.Println(scanner.Text()[0:55] + ".....")
+				dis_result = scanner.Text()[0:55] + "....."
 			} else {
-				fmt.Println(scanner.Text())
+				dis_result = scanner.Text()
 			}
+			result = append(result, scanResult{file_index, dis_result})
 		}
 	}
+
+	if len(result) > 0 {
+		fmt.Println(dis_file_path)
+		for i := range result {
+			println("\t" + strconv.Itoa(result[i].index) + "\t" + result[i].value)
+		}
+	}
+
 	return nil
 }
